@@ -1,5 +1,7 @@
 package net.chippymoo.creategolemsgalore;
 
+import net.chippymoo.creategolemsgalore.block.ModBlocks;
+import net.chippymoo.creategolemsgalore.item.ModCreativeModTabs;
 import net.chippymoo.creategolemsgalore.item.ModItems;
 import org.slf4j.Logger;
 
@@ -35,6 +37,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(CreateGolemsGalore.MOD_ID)
 public class CreateGolemsGalore
@@ -59,8 +62,10 @@ public class CreateGolemsGalore
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
 
-        ModItems.register(modEventBus);
+        ModCreativeModTabs.register(modEventBus);
 
+        ModItems.register(modEventBus);
+        ModBlocks.register(modEventBus);
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
 
@@ -77,8 +82,11 @@ public class CreateGolemsGalore
     private void addCreative(BuildCreativeModeTabContentsEvent event)
     {
         if(event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            event.accept(ModItems.INDUSTRIAL_IRON_HAT);
+
             event.accept(ModItems.COPPER_CALIBRATOR);
+        }
+        if(event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
+            event.accept(ModBlocks.INDUSTRIAL_IRON_HAT);
         }
     }
 

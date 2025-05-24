@@ -1,6 +1,3 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0":"creategolemsgalore:item/industrial_iron_hat"
-  }
+  "parent": "creategolemsgalore:block/industrial_iron_hat"
 }
