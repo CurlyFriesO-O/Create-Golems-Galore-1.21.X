@@ -1,5 +1,6 @@
 package net.chippymoo.creategolemsgalore;
 
+import net.chippymoo.creategolemsgalore.item.ModItems;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -58,6 +59,8 @@ public class CreateGolemsGalore
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
 
+        ModItems.register(modEventBus);
+
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
 
@@ -73,7 +76,10 @@ public class CreateGolemsGalore
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event)
     {
-
+        if(event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            event.accept(ModItems.INDUSTRIAL_IRON_HAT);
+            event.accept(ModItems.COPPER_CALIBRATOR);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
