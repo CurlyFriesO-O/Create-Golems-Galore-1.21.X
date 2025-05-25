@@ -1,6 +1,5 @@
 {
   "itemGroup.examplemod": "Example Mod Tab",
-  "block.creategolemsgalore.industrial_iron_hat_block": "Industrial Iron Hat block",
-  "item.creategolemsgalore.industrial_iron_hat": "Industrial Iron Hat",
+  "block.creategolemsgalore.industrial_iron_hat": "Industrial Iron Hat",
   "item.creategolemsgalore.copper_calibrator": "Copper Calibrator"
 }

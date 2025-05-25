@@ -1,6 +1,64 @@
 {
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "creategolemsgalore:block/industrial_iron_hat"
-  }
+	"credit": "Made with Blockbench",
+	"texture_size": [128, 128],
+	"textures": {
+		"0": "creategolemsgalore:block/industrial_iron_hat"
+	},
+	"elements": [
+		{
+			"name": "hat_brim",
+			"from": [0, 0, 0],
+			"to": [16, 3, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7, 1, 8]},
+			"faces": {
+				"north": {"uv": [2, 2, 4, 2.375], "texture": "#0"},
+				"east": {"uv": [0, 2, 2, 2.375], "texture": "#0"},
+				"south": {"uv": [6, 2, 8, 2.375], "texture": "#0"},
+				"west": {"uv": [4, 2, 6, 2.375], "texture": "#0"},
+				"up": {"uv": [4, 2, 2, 0], "texture": "#0"},
+				"down": {"uv": [6, 0, 4, 2], "texture": "#0"}
+			}
+		},
+		{
+			"name": "hat",
+			"from": [1.5, 3, 3],
+			"to": [14.5, 12, 13],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 13, 11]},
+			"faces": {
+				"north": {"uv": [1.25, 6.125, 2.875, 7.25], "texture": "#0"},
+				"east": {"uv": [0, 6.125, 1.25, 7.25], "texture": "#0"},
+				"south": {"uv": [4.125, 6.125, 5.75, 7.25], "texture": "#0"},
+				"west": {"uv": [2.875, 6.125, 4.125, 7.25], "texture": "#0"},
+				"up": {"uv": [2.875, 6.125, 1.25, 4.875], "texture": "#0"},
+				"down": {"uv": [4.5, 4.875, 2.875, 6.125], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, 2, 0.5],
+			"scale": [0.32, 0.31, 0.33]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, 2, 0],
+			"scale": [0.32, 0.32, 0.32]
+		},
+		"firstperson_righthand": {
+			"translation": [1, 2.75, 0],
+			"scale": [0.51, 0.51, 0.53]
+		},
+		"ground": {
+			"rotation": [0, 85, -14],
+			"translation": [0.75, 1.75, 1],
+			"scale": [0.32, 0.32, 0.32]
+		},
+		"gui": {
+			"rotation": [19, 37, 0],
+			"scale": [0.62, 0.62, 0.65]
+		},
+		"head": {
+			"translation": [0, 13.75, 0],
+			"scale": [1.19, 1.23, 1.09]
+		}
+	}
 }

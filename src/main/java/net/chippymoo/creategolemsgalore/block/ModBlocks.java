@@ -1,6 +1,7 @@
 package net.chippymoo.creategolemsgalore.block;
 
 import net.chippymoo.creategolemsgalore.CreateGolemsGalore;
+import net.chippymoo.creategolemsgalore.block.custom.HatBlock;
 import net.chippymoo.creategolemsgalore.item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -18,8 +19,8 @@ public class ModBlocks {
             DeferredRegister.createBlocks(CreateGolemsGalore.MOD_ID);
 
     public static final DeferredBlock<Block> INDUSTRIAL_IRON_HAT = registerBlock("industrial_iron_hat",
-            () -> new Block(BlockBehaviour.Properties.of()
-                    .strength(4f).requiresCorrectToolForDrops().sound(SoundType.AMETHYST)));
+            () -> new HatBlock(BlockBehaviour.Properties.of().noOcclusion()
+                    .strength(4f).requiresCorrectToolForDrops().sound(SoundType.ANVIL)));
 
 
 
