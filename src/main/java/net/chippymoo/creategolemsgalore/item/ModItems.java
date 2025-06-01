@@ -1,9 +1,11 @@
 package net.chippymoo.creategolemsgalore.item;
 
 import net.chippymoo.creategolemsgalore.CreateGolemsGalore;
+import net.chippymoo.creategolemsgalore.entity.ModEntities;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -13,6 +15,9 @@ public class ModItems {
 
     public static final DeferredItem<Item> COPPER_CALIBRATOR = ITEMS.register("copper_calibrator",
             () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> ANDESITE_GOLEM_SPAWN_EGG = ITEMS.register("andesite_golem_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ANDESITEGOLEM,929995,666060,
+                    new Item.Properties()));
 
     public static void register(IEventBus eventBus)
     {

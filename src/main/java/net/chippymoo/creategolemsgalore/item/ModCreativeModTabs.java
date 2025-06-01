@@ -22,6 +22,7 @@ public class ModCreativeModTabs {
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(ModItems.COPPER_CALIBRATOR);
                         output.accept(ModBlocks.INDUSTRIAL_IRON_HAT);
+                        output.accept(ModItems.ANDESITE_GOLEM_SPAWN_EGG);
 
                     }).build());
 

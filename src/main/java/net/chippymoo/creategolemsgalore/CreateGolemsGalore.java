@@ -1,8 +1,11 @@
 package net.chippymoo.creategolemsgalore;
 
 import net.chippymoo.creategolemsgalore.block.ModBlocks;
+import net.chippymoo.creategolemsgalore.entity.ModEntities;
+import net.chippymoo.creategolemsgalore.entity.client.AndesiteGolemRenderer;
 import net.chippymoo.creategolemsgalore.item.ModCreativeModTabs;
 import net.chippymoo.creategolemsgalore.item.ModItems;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -66,6 +69,7 @@ public class CreateGolemsGalore
 
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModEntities.register(modEventBus);
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
 
@@ -106,6 +110,8 @@ public class CreateGolemsGalore
         public static void onClientSetup(FMLClientSetupEvent event)
         {
 
+
+            EntityRenderers.register(ModEntities.ANDESITEGOLEM.get(), AndesiteGolemRenderer::new);
         }
     }
 }
