@@ -18,7 +18,7 @@ public class RenderEvents {
         LivingEntity entity = event.getEntity();
         PoseStack poseStack = event.getPoseStack();
 
-        // Example: scale baby mobs down
+
         if (entity.getType() == ModEntities.ANDESITEGOLEM.get()) {
             float scale = 0.75F;
             poseStack.scale(scale, scale, scale);
