@@ -1,5 +1,6 @@
 package net.chippymoo.creategolemsgalore.entity.custom;
 
+import net.chippymoo.creategolemsgalore.goals.AndesiteGolemPress;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.AnimationState;
@@ -30,11 +31,13 @@ public class AndesiteGolem extends Animal {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
-        this.goalSelector.addGoal(2, new TemptGoal(this, 1.25, stack -> stack.is(Items.IRON_NUGGET), false));
+        this.goalSelector.addGoal(2, new AndesiteGolemPress(this, 1.5));
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, stack -> stack.is(Items.IRON_NUGGET), false));
 
-        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
+
     }
 
 
