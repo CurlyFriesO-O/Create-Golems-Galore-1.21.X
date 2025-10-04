@@ -78,8 +78,14 @@ public class AndesiteGolemModel <T extends AndesiteGolem > extends HierarchicalM
         this.root().getAllParts().forEach(ModelPart::resetPose);
         this.applyHeadRotation(netHeadYaw, headPitch);
 
-        this.animateWalk(AndesiteGolemAnimations.ANDESITEGOLEM_WALK_ANIM, limbSwing, limbSwingAmount, 2f, 2.5f);
-        this.animate(entity.idleAnimationState, AndesiteGolemAnimations.ANDESITEGOLEM_IDLE_ANIM, ageInTicks, 1f);
+        if (entity.isPressing()) {
+            // Priority: pressing animation
+            this.animate(entity.pressingAnimationState, AndesiteGolemAnimations.ANDESITEGOLEM_PRESS_ANIM, ageInTicks, 1f);
+        } else {
+            // Walk + idle animations only if not pressing
+            this.animateWalk(AndesiteGolemAnimations.ANDESITEGOLEM_WALK_ANIM, limbSwing, limbSwingAmount, 2f, 2.5f);
+            this.animate(entity.idleAnimationState, AndesiteGolemAnimations.ANDESITEGOLEM_IDLE_ANIM, ageInTicks, 1f);
+        }
     }
 
     private void applyHeadRotation(float headYaw, float headPitch) {

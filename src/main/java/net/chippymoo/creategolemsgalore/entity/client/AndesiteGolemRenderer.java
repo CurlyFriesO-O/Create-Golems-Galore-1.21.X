@@ -28,4 +28,5 @@ public class AndesiteGolemRenderer extends MobRenderer <AndesiteGolem, AndesiteG
 
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }
+
 }
