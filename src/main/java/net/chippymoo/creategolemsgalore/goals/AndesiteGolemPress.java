@@ -37,7 +37,7 @@ public class AndesiteGolemPress extends Goal {
     private BlockPos targetDepot;
 
     private static final int PRESS_DURATION = 40; // animation length in ticks
-    private static final int IMPACT_TICK = 35; // tick where pressing occurs
+    private static final int IMPACT_TICK = 27; // tick where pressing occurs
 
     public AndesiteGolemPress(AndesiteGolem golem, double speed) {
         this.golem = golem;
@@ -113,19 +113,14 @@ public class AndesiteGolemPress extends Goal {
             return;
         }
 
-        // Trigger pressing if close enough
-        if (golem.blockPosition().closerThan(targetDepot, 1.5) && !golem.isPressing()) {
-            // Set callback to execute pressDepot at impact frame
-            golem.setPressCallback(() -> pressDepot(targetDepot, golem));
 
-            // Start pressing animation (entity handles freeze and timing)
+        if (golem.blockPosition().closerThan(targetDepot, 1.5) && !golem.isPressing()) {
+            golem.setPressCallback(() -> pressDepot(targetDepot, golem));
             golem.startPressAnimation();
         }
     }
 
-    // -------------------------
-    // Helper to pick a side of the depot
-    // -------------------------
+
     private BlockPos getAdjacentSide(BlockPos depotPos) {
         BlockPos[] sides = {
                 depotPos.offset(1, 0, 0),
@@ -133,8 +128,6 @@ public class AndesiteGolemPress extends Goal {
                 depotPos.offset(0, 0, 1),
                 depotPos.offset(0, 0, -1)
         };
-
-        // Pick the closest side to the golem
         BlockPos closest = sides[0];
         double minDist = golem.blockPosition().distSqr(closest);
         for (BlockPos pos : sides) {
@@ -147,9 +140,7 @@ public class AndesiteGolemPress extends Goal {
         return closest;
     }
 
-    // -------------------------
-    // Check if item has a pressing recipe
-    // -------------------------
+    //Check create mod for a compatible recipe
     private boolean isPressable(ItemStack stack, Level level) {
         SingleRecipeInput input = new SingleRecipeInput(stack.copy());
         Optional<RecipeHolder<PressingRecipe>> maybe =
@@ -157,9 +148,7 @@ public class AndesiteGolemPress extends Goal {
         return maybe.isPresent();
     }
 
-    // -------------------------
-    // Pressing logic
-    // -------------------------
+
     public static void pressDepot(BlockPos pos, Animal self) {
         if (!(self.level().getBlockEntity(pos) instanceof DepotBlockEntity depot)) return;
 

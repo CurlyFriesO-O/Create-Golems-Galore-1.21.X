@@ -1,7 +1,9 @@
 package net.chippymoo.creategolemsgalore.entity.custom;
 
+import com.simibubi.create.AllItems;
 import net.chippymoo.creategolemsgalore.goals.AndesiteGolemPress;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -25,8 +27,13 @@ public class AndesiteGolem extends Animal {
     public final AnimationState idleAnimationState = new AnimationState();
     public final AnimationState pressingAnimationState = new AnimationState();
 
-    private int idleAnimationTimeout = 40;
-    private int pressingTicks = 0;
+
+    private int pressingTimer = 0;
+    private boolean isFrozen = false;
+    private PressAction pressCallback;
+
+    private static final int ANIMATION_LENGTH = 40;
+    private static final int IMPACT_TICK = 27;
 
     private static final EntityDataAccessor<Boolean> DATA_PRESSING =
             SynchedEntityData.defineId(AndesiteGolem.class, EntityDataSerializers.BOOLEAN);
@@ -41,7 +48,7 @@ public class AndesiteGolem extends Animal {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
         this.goalSelector.addGoal(2, new AndesiteGolemPress(this, 1.5));
-        this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, stack -> stack.is(Items.IRON_NUGGET), false));
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, stack -> stack.is(AllItems.ANDESITE_ALLOY), false));
 
         this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -73,12 +80,6 @@ public class AndesiteGolem extends Animal {
 
 
 
-    private int pressingTimer = 0;
-    private boolean isFrozen = false;
-    private PressAction pressCallback;
-
-    private static final int ANIMATION_LENGTH = 40; // total ticks of pressing animation
-    private static final int IMPACT_TICK = 35;      // tick where the press happens
 
     // Callback interface for pressing
     public interface PressAction {
@@ -161,6 +162,17 @@ public class AndesiteGolem extends Animal {
                 // Play sound
                 this.level().playSound(null, this.blockPosition(),
                         SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
+
+                if (this.level() instanceof ServerLevel serverLevel && this.isPressing()) {
+                    serverLevel.sendParticles(
+                            ParticleTypes.CRIT,
+                            this.getX(),
+                            this.getY() + 1.0,
+                            this.getZ(),
+                            5, 0.2, 0.2, 0.2, 0.01
+                    );
+                }
+
 
                 // Call the goal’s press logic
                 if (pressCallback != null) {
