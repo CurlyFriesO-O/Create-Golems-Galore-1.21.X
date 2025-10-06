@@ -26,17 +26,17 @@ public class AndesiteGolemPress extends Goal {
     private final double speed;
     private BlockPos targetDepot;
 
-    public AndesiteGolemPress(AndesiteGolem golem, double speed) {
+    public AndesiteGolemPress(AndesiteGolem golem, double speed)
+    {
         this.golem = golem;
         this.speed = speed;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
-    // -------------------------------
-    // When should this goal run
-    // -------------------------------
+    //If it can use the press function or not.
     @Override
-    public boolean canUse() {
+    public boolean canUse()
+    {
         Level level = golem.level();
         BlockPos golemPos = golem.blockPosition();
         int radius = 8;
@@ -45,10 +45,13 @@ public class AndesiteGolemPress extends Goal {
                 golemPos.offset(-radius, -2, -radius),
                 golemPos.offset(radius, 2, radius))) {
 
-            if (level.getBlockState(pos).is(AllBlocks.DEPOT.get())) {
-                if (level.getBlockEntity(pos) instanceof DepotBlockEntity depot) {
+            if (level.getBlockState(pos).is(AllBlocks.DEPOT.get()))
+            {
+                if (level.getBlockEntity(pos) instanceof DepotBlockEntity depot)
+                {
                     ItemStack item = depot.getHeldItem();
-                    if (!item.isEmpty() && isPressable(item, level)) {
+                    if (!item.isEmpty() && isPressable(item, level))
+                    {
                         targetDepot = pos.immutable();
                         return true;
                     }
@@ -59,43 +62,52 @@ public class AndesiteGolemPress extends Goal {
     }
 
     @Override
-    public boolean canContinueToUse() {
-        if (targetDepot == null) return false;
+    public boolean canContinueToUse()
+    {
+        if (targetDepot == null)
+        {
+            return false;
+        }
 
-        if (!(golem.level().getBlockEntity(targetDepot) instanceof DepotBlockEntity depot)) return false;
+        if (!(golem.level().getBlockEntity(targetDepot) instanceof DepotBlockEntity depot))
+        {
+            return false;
+        }
+
         ItemStack stack = depot.getHeldItem();
-        if (stack.isEmpty() || !isPressable(stack, golem.level())) return false;
 
-        // Continue while pressing or walking there
+        if (stack.isEmpty() || !isPressable(stack, golem.level()))
+        {
+            return false;
+        }
+
         return golem.isPressing() || !golem.blockPosition().closerThan(targetDepot, 2.5);
     }
 
-    // -------------------------------
-    // When the goal starts
-    // -------------------------------
     @Override
-    public void start() {
-        if (targetDepot != null) {
+    public void start()
+    {
+        if (targetDepot != null)
+        {
             Vec3 depotCenter = Vec3.atCenterOf(targetDepot);
             golem.getNavigation().moveTo(depotCenter.x, depotCenter.y, depotCenter.z, speed);
         }
     }
 
-    // -------------------------------
-    // Called every tick
-    // -------------------------------
     @Override
     public void tick() {
         if (targetDepot == null) return;
         Level level = golem.level();
 
-        if (!(level.getBlockEntity(targetDepot) instanceof DepotBlockEntity depot)) {
+        if (!(level.getBlockEntity(targetDepot) instanceof DepotBlockEntity depot))
+        {
             stopPressing();
             return;
         }
 
         ItemStack stack = depot.getHeldItem();
-        if (stack.isEmpty() || !isPressable(stack, level)) {
+        if (stack.isEmpty() || !isPressable(stack, level))
+        {
             stopPressing();
             return;
         }
@@ -103,60 +115,70 @@ public class AndesiteGolemPress extends Goal {
         Vec3 depotCenter = Vec3.atCenterOf(targetDepot);
         double distSq = golem.distanceToSqr(depotCenter);
 
-        // Keep moving until close enough
-        if (distSq > 2.25) {
-            if (golem.getNavigation().isDone() && !golem.isFrozen()) {
+        if (distSq > 2.25)
+        {
+            if (golem.getNavigation().isDone() && !golem.isFrozen())
+            {
                 golem.getNavigation().moveTo(depotCenter.x, depotCenter.y, depotCenter.z, speed);
             }
             return;
         }
 
-        // Look at the depot while close
         golem.getLookControl().setLookAt(depotCenter.x, depotCenter.y + 0.5, depotCenter.z);
 
-        // Trigger press once when in range
-        if (!golem.isPressing()) {
+        if (!golem.isPressing())
+        {
             golem.setPressCallback(() -> pressDepot(targetDepot, golem));
             golem.startPressAnimation();
         }
     }
 
     @Override
-    public void stop() {
+    public void stop()
+    {
         stopPressing();
     }
 
-    private void stopPressing() {
+    private void stopPressing()
+    {
         golem.setPressing(false);
         golem.setFrozen(false);
         targetDepot = null;
     }
 
-    // -------------------------------
-    // Helper methods
-    // -------------------------------
-    private boolean isPressable(ItemStack stack, Level level) {
+
+    private boolean isPressable(ItemStack stack, Level level)
+    {
         SingleRecipeInput input = new SingleRecipeInput(stack.copy());
         Optional<RecipeHolder<PressingRecipe>> maybe =
                 level.getRecipeManager().getRecipeFor(AllRecipeTypes.PRESSING.getType(), input, level);
         return maybe.isPresent();
     }
 
-    // -------------------------------
-    // Perform the press action
-    // -------------------------------
-    public static void pressDepot(BlockPos pos, AndesiteGolem golem) {
+
+    public static void pressDepot(BlockPos pos, AndesiteGolem golem)
+    {
         Level level = golem.level();
-        if (!(level.getBlockEntity(pos) instanceof DepotBlockEntity depot)) return;
+        if (!(level.getBlockEntity(pos) instanceof DepotBlockEntity depot))
+        {
+            return;
+        }
 
         ItemStack input = depot.getHeldItem();
-        if (input.isEmpty()) return;
+
+        if (input.isEmpty())
+        {
+            return;
+        }
 
         SingleRecipeInput recipeInput = new SingleRecipeInput(input.copy());
         Optional<RecipeHolder<PressingRecipe>> maybe =
                 level.getRecipeManager().getRecipeFor(AllRecipeTypes.PRESSING.getType(), recipeInput, level);
 
-        if (maybe.isEmpty()) return;
+        if (maybe.isEmpty())
+        {
+            return;
+        }
 
         PressingRecipe recipe = maybe.get().value();
         ItemStack output = recipe.assemble(recipeInput, level.registryAccess());
@@ -166,8 +188,9 @@ public class AndesiteGolemPress extends Goal {
         depot.setChanged();
         level.sendBlockUpdated(pos, depot.getBlockState(), depot.getBlockState(), 3);
 
-        // Feedback effects
-        if (level instanceof ServerLevel server) {
+        //Effects
+        if (level instanceof ServerLevel server)
+        {
             server.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.7F, 1.0F);
             server.sendParticles(
                     ParticleTypes.CRIT,

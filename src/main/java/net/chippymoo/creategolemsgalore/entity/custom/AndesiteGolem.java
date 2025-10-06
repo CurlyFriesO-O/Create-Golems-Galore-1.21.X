@@ -35,12 +35,14 @@ public class AndesiteGolem extends Animal {
     private static final EntityDataAccessor<Boolean> DATA_PRESSING =
             SynchedEntityData.defineId(AndesiteGolem.class, EntityDataSerializers.BOOLEAN);
 
-    public AndesiteGolem(EntityType<? extends Animal> entityType, Level level) {
+    public AndesiteGolem(EntityType<? extends Animal> entityType, Level level)
+    {
         super(entityType, level);
     }
 
     @Override
-    protected void registerGoals() {
+    protected void registerGoals()
+    {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
         this.goalSelector.addGoal(2, new AndesiteGolemPress(this, 1.5));
@@ -50,7 +52,8 @@ public class AndesiteGolem extends Animal {
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
     }
 
-    public static AttributeSupplier.Builder createAttributes() {
+    public static AttributeSupplier.Builder createAttributes()
+    {
         return Animal.createLivingAttributes()
                 .add(Attributes.MAX_HEALTH, 10.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 2.0D)
@@ -59,79 +62,91 @@ public class AndesiteGolem extends Animal {
     }
 
     @Override
-    public boolean isFood(ItemStack stack) {
+    public boolean isFood(ItemStack stack)
+    {
         return false;
     }
 
     @Nullable
     @Override
-    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner)
+    {
         return null;
     }
 
-    // -------- Pressing State --------
 
-    public interface PressAction {
+    public interface PressAction
+    {
         void onImpact();
     }
 
-    public void setPressCallback(PressAction callback) {
+    public void setPressCallback(PressAction callback)
+    {
         this.pressCallback = callback;
     }
 
-    public boolean isPressing() {
+    public boolean isPressing()
+    {
         return this.entityData.get(DATA_PRESSING);
     }
 
-    public void setPressing(boolean pressing) {
+    public void setPressing(boolean pressing)
+    {
         this.entityData.set(DATA_PRESSING, pressing);
     }
 
-    public void setFrozen(boolean frozen) {
+    public void setFrozen(boolean frozen)
+    {
         this.isFrozen = frozen;
     }
 
-    public boolean isFrozen() {
+    public boolean isFrozen()
+    {
         return this.isFrozen;
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    protected void defineSynchedData(SynchedEntityData.Builder builder)
+    {
         super.defineSynchedData(builder);
         builder.define(DATA_PRESSING, false);
     }
 
     @Override
     public void handleEntityEvent(byte id) {
-        if (id == 11) {
-            // client receives server trigger
+        if (id == 11)
+        {
             this.pressingAnimationState.start(this.tickCount);
-        } else {
+        }
+        else
+        {
             super.handleEntityEvent(id);
         }
     }
 
-    // -------------------------
-    // Start pressing animation
-    // -------------------------
-    public void startPressAnimation() {
-        // Avoid retriggering
+    public void startPressAnimation()
+    {
+
         if (this.isPressing()) return;
 
         this.setPressing(true);
         this.setFrozen(true);
         this.pressingTimer = ANIMATION_LENGTH;
 
-        // Stop navigation once
-        if (this.getNavigation().isInProgress()) {
+
+        if (this.getNavigation().isInProgress())
+        {
             this.getNavigation().stop();
         }
 
-        // Trigger client animation
-        if (level().isClientSide) {
+
+        if (level().isClientSide)
+        {
             this.pressingAnimationState.start(this.tickCount);
             this.pressingAnimationState.animateWhen(true, this.tickCount);
-        } else {
+        }
+        else
+        {
             this.level().broadcastEntityEvent(this, (byte) 11);
         }
     }
@@ -140,21 +155,25 @@ public class AndesiteGolem extends Animal {
     public void tick() {
         super.tick();
 
-        // Animate pressing on client
-        if (level().isClientSide && this.isPressing()) {
+
+        if (level().isClientSide && this.isPressing())
+        {
             this.pressingAnimationState.animateWhen(true, this.tickCount);
         }
 
-        // Countdown on server
-        if (!level().isClientSide && this.isPressing()) {
+
+        if (!level().isClientSide && this.isPressing())
+        {
             pressingTimer--;
 
-            // Impact tick
-            if (pressingTimer == ANIMATION_LENGTH - IMPACT_TICK) {
+
+            if (pressingTimer == ANIMATION_LENGTH - IMPACT_TICK)
+            {
                 this.level().playSound(null, this.blockPosition(),
                         SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
 
-                if (this.level() instanceof ServerLevel server) {
+                if (this.level() instanceof ServerLevel server)
+                {
                     server.sendParticles(
                             ParticleTypes.CRIT,
                             this.getX(),
@@ -164,14 +183,16 @@ public class AndesiteGolem extends Animal {
                     );
                 }
 
-                // Execute press action callback once
-                if (pressCallback != null) {
+
+                if (pressCallback != null)
+                {
                     pressCallback.onImpact();
                 }
             }
 
-            // End pressing
-            if (pressingTimer <= 0) {
+
+            if (pressingTimer <= 0)
+            {
                 this.setPressing(false);
                 this.setFrozen(false);
                 pressCallback = null;
