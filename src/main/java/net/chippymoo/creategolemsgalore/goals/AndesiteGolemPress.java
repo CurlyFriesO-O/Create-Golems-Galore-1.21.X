@@ -6,26 +6,16 @@ import com.simibubi.create.content.logistics.depot.DepotBlockEntity;
 import com.simibubi.create.content.kinetics.press.PressingRecipe;
 import net.chippymoo.creategolemsgalore.entity.custom.AndesiteGolem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
-import com.simibubi.create.AllRecipeTypes;
-import com.simibubi.create.content.kinetics.press.PressingRecipe;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.pathfinder.PathFinder;
-
+import net.minecraft.world.phys.Vec3;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -36,15 +26,15 @@ public class AndesiteGolemPress extends Goal {
     private final double speed;
     private BlockPos targetDepot;
 
-    private static final int PRESS_DURATION = 40; // animation length in ticks
-    private static final int IMPACT_TICK = 27; // tick where pressing occurs
-
     public AndesiteGolemPress(AndesiteGolem golem, double speed) {
         this.golem = golem;
         this.speed = speed;
-        this.setFlags(EnumSet.of(Flag.MOVE));
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
+    // -------------------------------
+    // When should this goal run
+    // -------------------------------
     @Override
     public boolean canUse() {
         Level level = golem.level();
@@ -72,75 +62,79 @@ public class AndesiteGolemPress extends Goal {
     public boolean canContinueToUse() {
         if (targetDepot == null) return false;
 
-        // Cancel if depot is empty or item is no longer pressable
         if (!(golem.level().getBlockEntity(targetDepot) instanceof DepotBlockEntity depot)) return false;
         ItemStack stack = depot.getHeldItem();
         if (stack.isEmpty() || !isPressable(stack, golem.level())) return false;
 
-        return golem.isPressing() || !golem.blockPosition().closerThan(targetDepot, 2.0);
+        // Continue while pressing or walking there
+        return golem.isPressing() || !golem.blockPosition().closerThan(targetDepot, 2.5);
     }
 
+    // -------------------------------
+    // When the goal starts
+    // -------------------------------
     @Override
     public void start() {
         if (targetDepot != null) {
-            // Move to a side of the depot
-            BlockPos sidePos = getAdjacentSide(targetDepot);
-            golem.getNavigation().moveTo(
-                    sidePos.getX() + 0.5,
-                    sidePos.getY(),
-                    sidePos.getZ() + 0.5,
-                    speed
-            );
+            Vec3 depotCenter = Vec3.atCenterOf(targetDepot);
+            golem.getNavigation().moveTo(depotCenter.x, depotCenter.y, depotCenter.z, speed);
         }
     }
 
+    // -------------------------------
+    // Called every tick
+    // -------------------------------
     @Override
     public void tick() {
         if (targetDepot == null) return;
+        Level level = golem.level();
 
-        // Cancel if depot becomes invalid mid-animation
-        if (!(golem.level().getBlockEntity(targetDepot) instanceof DepotBlockEntity depot)) {
-            targetDepot = null;
-            golem.setPressing(false);
-            golem.setFrozen(false);
+        if (!(level.getBlockEntity(targetDepot) instanceof DepotBlockEntity depot)) {
+            stopPressing();
             return;
         }
+
         ItemStack stack = depot.getHeldItem();
-        if (stack.isEmpty() || !isPressable(stack, golem.level())) {
-            targetDepot = null;
-            golem.setPressing(false);
-            golem.setFrozen(false);
+        if (stack.isEmpty() || !isPressable(stack, level)) {
+            stopPressing();
             return;
         }
 
+        Vec3 depotCenter = Vec3.atCenterOf(targetDepot);
+        double distSq = golem.distanceToSqr(depotCenter);
 
-        if (golem.blockPosition().closerThan(targetDepot, 1.5) && !golem.isPressing()) {
+        // Keep moving until close enough
+        if (distSq > 2.25) {
+            if (golem.getNavigation().isDone() && !golem.isFrozen()) {
+                golem.getNavigation().moveTo(depotCenter.x, depotCenter.y, depotCenter.z, speed);
+            }
+            return;
+        }
+
+        // Look at the depot while close
+        golem.getLookControl().setLookAt(depotCenter.x, depotCenter.y + 0.5, depotCenter.z);
+
+        // Trigger press once when in range
+        if (!golem.isPressing()) {
             golem.setPressCallback(() -> pressDepot(targetDepot, golem));
             golem.startPressAnimation();
         }
     }
 
-
-    private BlockPos getAdjacentSide(BlockPos depotPos) {
-        BlockPos[] sides = {
-                depotPos.offset(1, 0, 0),
-                depotPos.offset(-1, 0, 0),
-                depotPos.offset(0, 0, 1),
-                depotPos.offset(0, 0, -1)
-        };
-        BlockPos closest = sides[0];
-        double minDist = golem.blockPosition().distSqr(closest);
-        for (BlockPos pos : sides) {
-            double dist = golem.blockPosition().distSqr(pos);
-            if (dist < minDist) {
-                minDist = dist;
-                closest = pos;
-            }
-        }
-        return closest;
+    @Override
+    public void stop() {
+        stopPressing();
     }
 
-    //Check create mod for a compatible recipe
+    private void stopPressing() {
+        golem.setPressing(false);
+        golem.setFrozen(false);
+        targetDepot = null;
+    }
+
+    // -------------------------------
+    // Helper methods
+    // -------------------------------
     private boolean isPressable(ItemStack stack, Level level) {
         SingleRecipeInput input = new SingleRecipeInput(stack.copy());
         Optional<RecipeHolder<PressingRecipe>> maybe =
@@ -148,31 +142,42 @@ public class AndesiteGolemPress extends Goal {
         return maybe.isPresent();
     }
 
-
-    public static void pressDepot(BlockPos pos, Animal self) {
-        if (!(self.level().getBlockEntity(pos) instanceof DepotBlockEntity depot)) return;
+    // -------------------------------
+    // Perform the press action
+    // -------------------------------
+    public static void pressDepot(BlockPos pos, AndesiteGolem golem) {
+        Level level = golem.level();
+        if (!(level.getBlockEntity(pos) instanceof DepotBlockEntity depot)) return;
 
         ItemStack input = depot.getHeldItem();
         if (input.isEmpty()) return;
 
-        Level level = self.level();
-
-        SimpleContainer container = new SimpleContainer(input.copy());
-
         SingleRecipeInput recipeInput = new SingleRecipeInput(input.copy());
-
         Optional<RecipeHolder<PressingRecipe>> maybe =
                 level.getRecipeManager().getRecipeFor(AllRecipeTypes.PRESSING.getType(), recipeInput, level);
 
-        if (maybe.isPresent()) {
-            PressingRecipe recipe = maybe.get().value();
-            ItemStack output = recipe.assemble(recipeInput, level.registryAccess());
-            output.setCount(Math.min(input.getCount(), output.getMaxStackSize()));
+        if (maybe.isEmpty()) return;
 
-            depot.setHeldItem(output.copy());
-            depot.setChanged();
-            level.sendBlockUpdated(pos, depot.getBlockState(), depot.getBlockState(), 3);
+        PressingRecipe recipe = maybe.get().value();
+        ItemStack output = recipe.assemble(recipeInput, level.registryAccess());
+        output.setCount(Math.min(input.getCount(), output.getMaxStackSize()));
+
+        depot.setHeldItem(output.copy());
+        depot.setChanged();
+        level.sendBlockUpdated(pos, depot.getBlockState(), depot.getBlockState(), 3);
+
+        // Feedback effects
+        if (level instanceof ServerLevel server) {
+            server.playSound(null, pos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.7F, 1.0F);
+            server.sendParticles(
+                    ParticleTypes.CRIT,
+                    pos.getX() + 0.5,
+                    pos.getY() + 1.0,
+                    pos.getZ() + 0.5,
+                    8,
+                    0.1, 0.1, 0.1,
+                    0.02
+            );
         }
     }
 }
-

@@ -2,7 +2,6 @@ package net.chippymoo.creategolemsgalore.entity.custom;
 
 import com.simibubi.create.AllItems;
 import net.chippymoo.creategolemsgalore.goals.AndesiteGolemPress;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -19,14 +18,12 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public class AndesiteGolem extends Animal {
     public final AnimationState idleAnimationState = new AnimationState();
     public final AnimationState pressingAnimationState = new AnimationState();
-
 
     private int pressingTimer = 0;
     private boolean isFrozen = false;
@@ -38,7 +35,6 @@ public class AndesiteGolem extends Animal {
     private static final EntityDataAccessor<Boolean> DATA_PRESSING =
             SynchedEntityData.defineId(AndesiteGolem.class, EntityDataSerializers.BOOLEAN);
 
-
     public AndesiteGolem(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
     }
@@ -49,39 +45,32 @@ public class AndesiteGolem extends Animal {
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
         this.goalSelector.addGoal(2, new AndesiteGolemPress(this, 1.5));
         this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, stack -> stack.is(AllItems.ANDESITE_ALLOY), false));
-
         this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
-
     }
-
 
     public static AttributeSupplier.Builder createAttributes() {
         return Animal.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 10d)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 2)
+                .add(Attributes.MAX_HEALTH, 10.0D)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 2.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.1D)
-                .add(Attributes.FOLLOW_RANGE, 24D);
+                .add(Attributes.FOLLOW_RANGE, 24.0D);
     }
 
-
     @Override
-    public boolean isFood(ItemStack itemStack) {
+    public boolean isFood(ItemStack stack) {
         return false;
     }
 
-
+    @Nullable
     @Override
-    public @Nullable AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
         return null;
     }
 
+    // -------- Pressing State --------
 
-
-
-
-    // Callback interface for pressing
     public interface PressAction {
         void onImpact();
     }
@@ -126,16 +115,19 @@ public class AndesiteGolem extends Animal {
     // Start pressing animation
     // -------------------------
     public void startPressAnimation() {
-        if (this.isPressing()) return; // don't retrigger
+        // Avoid retriggering
+        if (this.isPressing()) return;
 
-        // Freeze movement
-        this.setFrozen(true);
-        this.getNavigation().stop();
-
-        // Start pressing animation
         this.setPressing(true);
+        this.setFrozen(true);
         this.pressingTimer = ANIMATION_LENGTH;
 
+        // Stop navigation once
+        if (this.getNavigation().isInProgress()) {
+            this.getNavigation().stop();
+        }
+
+        // Trigger client animation
         if (level().isClientSide) {
             this.pressingAnimationState.start(this.tickCount);
             this.pressingAnimationState.animateWhen(true, this.tickCount);
@@ -148,23 +140,22 @@ public class AndesiteGolem extends Animal {
     public void tick() {
         super.tick();
 
-        // Tick animation on client
+        // Animate pressing on client
         if (level().isClientSide && this.isPressing()) {
             this.pressingAnimationState.animateWhen(true, this.tickCount);
         }
 
-        // Countdown pressing timer on server
+        // Countdown on server
         if (!level().isClientSide && this.isPressing()) {
             pressingTimer--;
 
-            // Trigger impact tick
+            // Impact tick
             if (pressingTimer == ANIMATION_LENGTH - IMPACT_TICK) {
-                // Play sound
                 this.level().playSound(null, this.blockPosition(),
                         SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
 
-                if (this.level() instanceof ServerLevel serverLevel && this.isPressing()) {
-                    serverLevel.sendParticles(
+                if (this.level() instanceof ServerLevel server) {
+                    server.sendParticles(
                             ParticleTypes.CRIT,
                             this.getX(),
                             this.getY() + 1.0,
@@ -173,8 +164,7 @@ public class AndesiteGolem extends Animal {
                     );
                 }
 
-
-                // Call the goal’s press logic
+                // Execute press action callback once
                 if (pressCallback != null) {
                     pressCallback.onImpact();
                 }
@@ -184,13 +174,8 @@ public class AndesiteGolem extends Animal {
             if (pressingTimer <= 0) {
                 this.setPressing(false);
                 this.setFrozen(false);
-                pressCallback = null; // clear callback after pressing
+                pressCallback = null;
             }
         }
     }
 }
-
-
-
-
-
