@@ -91,6 +91,8 @@ public class CreateGolemsGalore
         }
         if(event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(ModBlocks.INDUSTRIAL_IRON_HAT);
+            event.accept(ModBlocks.INDUSTRIAL_BRASS_HAT);
+            event.accept(ModBlocks.INDUSTRIAL_BRASS_BLOCK);
         }
     }
 

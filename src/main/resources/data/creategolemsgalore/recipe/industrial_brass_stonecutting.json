@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "create:brass_block"
+  },
+  "result": {
+    "id": "creategolemsgalore:industrial_brass_block",
+    "count": 2
+  }
+}

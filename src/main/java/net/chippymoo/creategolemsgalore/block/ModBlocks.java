@@ -1,7 +1,9 @@
 package net.chippymoo.creategolemsgalore.block;
 
 import net.chippymoo.creategolemsgalore.CreateGolemsGalore;
+import net.chippymoo.creategolemsgalore.block.custom.BrassHatBlock;
 import net.chippymoo.creategolemsgalore.block.custom.HatBlock;
+import net.chippymoo.creategolemsgalore.block.custom.IndustrialBrassBlock;
 import net.chippymoo.creategolemsgalore.item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -22,7 +24,13 @@ public class ModBlocks {
             () -> new HatBlock(BlockBehaviour.Properties.of().noOcclusion()
                     .strength(4f).requiresCorrectToolForDrops().sound(SoundType.ANVIL)));
 
+    public static final DeferredBlock<Block> INDUSTRIAL_BRASS_HAT = registerBlock("industrial_brass_hat",
+            () -> new BrassHatBlock(BlockBehaviour.Properties.of().noOcclusion()
+                    .strength(4f).requiresCorrectToolForDrops().sound(SoundType.HEAVY_CORE)));
 
+    public static final DeferredBlock<Block> INDUSTRIAL_BRASS_BLOCK = registerBlock("industrial_brass_block",
+            () -> new IndustrialBrassBlock(BlockBehaviour.Properties.of().noOcclusion()
+                    .strength(3f).requiresCorrectToolForDrops().sound(SoundType.HEAVY_CORE)));
 
 
 

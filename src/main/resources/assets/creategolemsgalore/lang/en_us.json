@@ -1,10 +1,13 @@
 {
   "itemGroup.examplemod": "Example Mod Tab",
   "block.creategolemsgalore.industrial_iron_hat": "Industrial Iron Hat",
+  "block.creategolemsgalore.industrial_brass_hat":"Industrial Brass Hat",
+  "block.creategolemsgalore.industrial_brass_block": "Industrial Brass Block",
   "item.creategolemsgalore.copper_calibrator": "Copper Calibrator",
   "item.creategolemsgalore.andesite_golem_spawn_egg": "Andesite Golem Spawn Egg",
 
 
-  "entity.mccourse.andesite_golem": "Andesite Golem"
+  "entity.mccourse.andesite_golem": "Andesite Golem",
+  "entity.creategolemsgalore.andesite_golem": "Andesite Golem"
 
 }

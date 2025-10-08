@@ -1,0 +1,15 @@
+{
+  "type": "create:pressing",
+  "ingredients": [
+    {
+      "item": "creategolemsgalore:industrial_brass_block"
+    }
+  ],
+  "results": [
+    {
+      "item": {
+        "id": "creategolemsgalore:industrial_brass_hat"
+      }
+    }
+  ]
+}

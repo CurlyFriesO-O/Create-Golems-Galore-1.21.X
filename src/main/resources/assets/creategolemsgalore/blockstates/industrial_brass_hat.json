@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north":{
+      "model": "creategolemsgalore:block/industrial_brass_hat"
+    },
+    "facing=south":{
+      "model": "creategolemsgalore:block/industrial_brass_hat",
+      "y" : 180
+    },
+    "facing=east":{
+      "model": "creategolemsgalore:block/industrial_brass_hat",
+      "y" : 90
+    },
+    "facing=west":{
+      "model": "creategolemsgalore:block/industrial_brass_hat",
+      "y" : 270
+    }
+  }
+}
