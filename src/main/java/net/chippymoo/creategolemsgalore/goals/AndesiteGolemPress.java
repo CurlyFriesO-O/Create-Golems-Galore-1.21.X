@@ -26,6 +26,9 @@ public class AndesiteGolemPress extends Goal {
     private final double speed;
     private BlockPos targetDepot;
 
+
+
+
     public AndesiteGolemPress(AndesiteGolem golem, double speed)
     {
         this.golem = golem;
@@ -37,6 +40,10 @@ public class AndesiteGolemPress extends Goal {
     @Override
     public boolean canUse()
     {
+        if (golem.isWrenchLocked)
+        {
+            return false;
+        }
         Level level = golem.level();
         BlockPos golemPos = golem.blockPosition();
         int radius = 8;
@@ -64,6 +71,10 @@ public class AndesiteGolemPress extends Goal {
     @Override
     public boolean canContinueToUse()
     {
+        if (golem.isWrenchLocked)
+        {
+            return false;
+        }
         if (targetDepot == null)
         {
             return false;
