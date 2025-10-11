@@ -5,7 +5,9 @@ import com.simibubi.create.AllBlocks;
 import net.chippymoo.creategolemsgalore.entity.ModEntities;
 import net.chippymoo.creategolemsgalore.entity.custom.AndesiteGolem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -60,6 +62,10 @@ public class HatBlock extends HorizontalDirectionalBlock {
             if (golem != null) {
                 golem.moveTo(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5,
                         0.0F, 0.0F);
+                if (level instanceof ServerLevel serverLevel) {
+                    golem.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(spawnPos),
+                            MobSpawnType.MOB_SUMMONED, null);
+                }
                 level.addFreshEntity(golem);
             }
         }
